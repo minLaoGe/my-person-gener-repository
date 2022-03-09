@@ -1,0 +1,54 @@
+package ${package}.${moduleName}.entity;
+
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+#if(${hasBigDecimal})
+import java.math.BigDecimal;
+#end
+import java.io.Serializable;
+import java.util.Date;
+
+import lombok.Data;
+import ${commonUtilsPackName};
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+@Data
+@TableName("${tableName}")
+public class ${className}Entity implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+	/**
+	 * $column.comments
+	 */
+	#if($column.columnName == $pk.columnName)
+	@TableId(type = ${id_type})
+	#end
+@ApiModelProperty(value = "${column.comments}")
+@TableField("${column.columnName}")
+	#if($column.dataType =="String")
+	//	@NotBlank(message="$column.comments不能为空")
+	#else
+	//	@NotNull(message="$column.comments不能为空")
+	#end
+private $column.attrType $column.attrname;
+#end
+
+	#*使用mybatis lambda表达式代替*#
+	#*#foreach ($column in $columns)
+	public static  String mlgGet${column.attrName}Field(){
+		return CommonUtils.getFieldString(${className}Entity.class,"$column.attrname");
+	}
+#end*#
+
+}

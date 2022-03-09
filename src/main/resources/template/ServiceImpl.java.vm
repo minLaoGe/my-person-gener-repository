@@ -1,0 +1,31 @@
+package ${package}.${moduleName}.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.herocheer.module.data.mybatis.service.impl.BaseServiceImpl;
+##import ${package}.dao.${className}Dao;
+##import ${package}.entity.${className}Entity;
+##import ${package}.service.${className}Service;
+
+
+@Service("${classname}Service")
+public class ${className}ServiceImpl extends BaseServiceImpl<${className}Dao, ${className}Entity,${pk.attrType}> implements ${className}Service {
+    @Autowired
+    protected ${className}Dao ${classname}Dao;
+
+
+    @Override
+    public Page<${className}Entity> selectPageByComplexCondition(QueryWrapper wrapper, Page< ${className}Entity> page) {
+        //需要单表的复杂查询
+        // IPage page1 = this.page(page, wrapper);
+        //List<${className}Entity> records = page1.getRecords();
+
+        //多表的复杂查询
+        List<${className}Entity> byCondition = ${classname}Dao.selectPageByComplexCondition(wrapper, page);
+        return page.setRecords(byCondition);
+    }
+
+
+}

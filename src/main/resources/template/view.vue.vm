@@ -1,0 +1,636 @@
+<template>
+    <div class="bg-height">
+        <div class="height-100 bg-color">
+            <div class="xz_content">
+                <!--除查看详情-->
+                    <div class="tittle-header">
+                        <div class="tree_head_title f-left">服务站管理</div>
+                        <div class="text-right pr20 f-right">
+            	<span v-for="btn in btns05" :key="btn.id">
+              <el-button v-if="btn.description === 'add'" class="xz_btn xz_btn_nodelete ml-15" @click="handleDialog('add')">
+                <i class="iconfont icon-add mr10"></i>{{btn.name}}
+              </el-button>
+              <el-button v-if="btn.description === 'edit'" class="xz_btn xz_btn_nodelete ml-15" @click="handleDialog('edit')">
+                <i class="iconfont icon-edit mr10"></i>{{btn.name}}
+              </el-button>
+              <el-button v-if="btn.description === 'delete'" class="xz_btn xz_btn_delete ml-15" @click="handleDelete">
+                <i class="iconfont icon-delete mr10"></i>{{btn.name}}
+              </el-button>
+              <el-button v-if="btn.description === 'look'" class="xz_btn xz_btn_nodelete ml-15" @click="handleDialog('look')">
+                <i class="iconfont icon-audit mr5"></i>{{btn.name}}
+              </el-button>
+              <el-button v-if="btn.description === 'search'" class="xz_btn xz_btn_nodelete ml-15" @click="handleSearch">
+                <i class="iconfont icon-lookfor mr10"></i>{{btn.name}}
+              </el-button>
+              <el-button v-if="btn.description === 'clearSearch'" class="xz_btn xz_btn_nodelete ml-15" @click="handleClear" v-show="clearAble">
+                <i class="iconfont icon-clearSearch mr10"></i>{{btn.name}}
+              </el-button>
+                <el-button
+                            class="xz_btn xz_btn_nodelete ml-15"
+                            @click="handleExcel"
+                            v-if="btn.description === 'export'"
+                    >
+                <i class="iconfont icon-export mr10"></i>{{btn.name}}
+              </el-button>
+              </span>
+                            <!--<div @click="apply" v-if="item.description === 'apply'">{{item.name}}</div>-->
+                            <el-dropdown v-if="btns6.length > 0">
+                                <el-button class="xz_btn xz_btn_nodelete ml-15"><i class="iconfont iconmore-br mr10"></i>更多</el-button>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item v-for="item in btns6" :key="item.id">
+                                        <div @click="handleDialog('add')" v-if="item.description === 'add'">{{item.name}}</div>
+                                        <div @click="handleDialog('edit')" v-if="item.description === 'edit'">{{item.name}}</div>
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+
+                        </div>
+                    </div>
+                    <el-table
+                            :data="tableData"
+                            ref="xzTable"
+                            :header-cell-style="{backgroundColor:'#fff'}"
+                            @select="handleSelect"
+                            @select-all="handleSelectAll"
+                            :height="tableHeight"
+                            @row-click="handleCurrentChange"
+                            stripe
+                    >
+                        <el-table-column type="selection" width="55"></el-table-column>
+                        <el-table-column type="index" label="序号" width="55">
+                        </el-table-column>
+                        #foreach($column in $columns)
+                            #if($column.columnName != $pk.columnName)
+                                <el-table-column  label="${column.comments}" prop="${column.attrname}" min-width="80">
+                                </el-table-column>
+                            #end
+                        #end
+                    </el-table>
+                    <paginations v-show="queryParams.page.total > 0" :total="queryParams.page.total"
+                                 :page.sync="queryParams.page.page"
+                                 :limit.sync="queryParams.page.pageSize"
+                                 @pagination="getGroupList"></paginations>
+
+                </div>
+
+
+                <!--:facilityTypeList="facilityTypeList" -->
+            </div>
+
+
+        <!--查询弹窗-->
+        <div>
+            <el-dialog title="查询" :visible.sync="ifShowSearch" custom-class="dialog-type-column1"
+                       :close-on-click-modal="false">
+                <div class="dialog-form">
+                    <el-form
+                            :model="queryParams"
+                            ref="searchForm"
+                            label-position="right"
+                            label-width="150px"
+                            style="height: 150px;"
+                    >
+                    #foreach($column in $columns)
+                        #if($column.columnName != $pk.columnName)
+                            <el-form-item label="${column.comments}" prop="${column.attrname}">
+                                <el-input v-model="searchForm.params.${column.attrname}" placeholder="${column.comments}"></el-input>
+                            </el-form-item>
+                        #end
+                    #end
+                    </el-form>
+                </div>
+                <span slot="footer" class="dialog-footer">
+          <el-button @click="ifShowSearch = false" class="dialog_back_btn">返回</el-button>
+          <el-button type="primary" @click="doSearch()" class="dialog_sure_btn">查询</el-button>
+        </span>
+            </el-dialog>
+        </div>
+
+        <!--新建、编辑弹窗-->
+        <div>
+            <el-dialog :title="title" custom-class="dialog-type-column3" :visible.sync="ifShowAdd"
+                       :close-on-click-modal="false">
+                <div>
+                    <el-form :model="addForm"
+                             ref="addForm"
+                             label-position="right"
+                             label-width="110px"
+                             :rules="rules">
+                        <!--区域---->
+                        #foreach($column in $columns)
+                            #if($column.columnName != $pk.columnName)
+                            <el-col :span="8">
+                                <el-form-item label="${column.comments}" prop="${column.attrname}">
+                                    <el-input v-model="addForm.${column.attrname}" style="width: 100%;" placeholder="${column.comments}"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            #end
+                        #end
+                    </el-form>
+                </div>
+                <div slot="footer" class="dialog-footer">
+                    <!--<el-button @click="handleClickReset('addForm')" class="dialog_back_btn">重置</el-button>-->
+                    <el-button @click="ifShowAdd = false" class="dialog_back_btn">返回</el-button>
+                    <el-button type="primary" @click="handleClickSure" class="dialog_sure_btn">确 定</el-button>
+                </div>
+            </el-dialog>
+    </div>
+
+
+        <!--导出弹窗-->
+        <div>
+            <el-dialog
+                    :title="title"
+                    width="30%"
+                    :visible.sync="ifShowExport"
+                    :close-on-click-modal="false"
+            >
+                <div>
+                    <el-form :model="addForm" ref="addForm" label-position="right" label-width="150px">
+                        <el-form-item prop="startTime" label="开始日期">
+                            <el-date-picker
+                                    type="date"
+                                    format="yyyy-MM-dd HH:mm:ss "
+                                    value-format="yyyy-MM-dd HH:mm:ss"
+                                    v-model="addForm.startTime"
+                                    :readonly="type === 'look'"
+                                    :picker-options="pickerOption0"
+                            ></el-date-picker>
+                        </el-form-item>
+                        <el-form-item prop="finishTime" label="结束日期">
+                            <el-date-picker
+                                    type="date"
+                                    format="yyyy-MM-dd HH:mm:ss"
+                                    value-format="yyyy-MM-dd HH:mm:ss"
+                                    v-model="addForm.finishTime"
+                                    :readonly="type === 'look'"
+                                    :picker-options="pickerOption0"
+                            ></el-date-picker>
+                        </el-form-item>
+                    </el-form>
+                </div>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="ifShowExport = false" class="dialog_back_btn">返回</el-button>
+                    <el-button type="primary" @click="handleExcel" class="dialog_sure_btn">确 定</el-button>
+                </div>
+            </el-dialog>
+        </div>
+    </div>
+</template>
+
+<script>
+    import Vue from "vue";
+    import ElementUI from "element-ui";
+    import "element-ui/lib/theme-chalk/index.css";
+    import {
+        get,
+        post,
+        Delete,
+        POSTByArray,
+        POSTbyJSON,
+        POSTByAudit,
+        exportFn
+    } from "../../../components/http";
+    import {setTableHeight} from "../../../assets/js/setTableHeight";
+    import Paginations from '@/components/Paginations.vue'
+
+    Vue.use(ElementUI);
+    export default {
+        name: "ServeStationComp",
+        data() {
+            return {
+                // 表格数据
+                tableData: [],
+                selectItem: [],
+                tableHeight: null,
+                // 表单数据
+                queryParams: {
+                    page: {
+                        page: 1,
+                        pageSize: 10,
+                        total: 0
+                    },
+                    params: {
+
+                    },
+                },
+                // 新增的数据
+                addForm: {
+
+                },
+
+
+                // 必填项校验
+                rules: {
+                    #foreach($column in $columns)
+                        #if($column.columnName != $pk.columnName)
+                                ${column.attrname}: [
+                                { required: true, message: '${column.comments}不能为空', trigger: 'blur' }
+                            ]#if($velocityCount != $columns.size()),#end
+                        #end
+                    #end
+                },
+                // 清除查询按钮显隐
+                ifClearBtn: false,
+                //         新增、编辑、查看、查询、导出、导入弹窗 显隐
+                ifShowAdd: false,
+                ifShowSearch: false,
+                ifShowDialog: false,
+                ifShowExport: false,
+                ifShowImport: false,
+                lookDetailVisiable: false,
+
+                // 清空查询按钮 显隐
+                clearAble: false,
+                // 新增、编辑、查看的弹窗标题
+                title: "",
+                type: "",
+
+                // 按钮数组
+                btns: [],
+                // 限制日期最大值
+                pickerOption0: {
+                    disabledDate: function (time) {
+                        var date = new Date();
+                        var currentMonth = date.getMonth();
+                        var nextMonth = ++currentMonth;
+                        var nextMonthFirstDay = new Date(date.getFullYear(), nextMonth, 1);
+                        var oneDay = 1000 * 60 * 60 * 24;
+                        var lastTime = new Date(nextMonthFirstDay - oneDay);
+                        var month = parseInt(lastTime.getMonth() + 1);
+                        var day = lastTime.getDate();
+                        if (month < 10) {
+                            month = "0" + month;
+                        }
+                        if (day < 10) {
+                            day = "0" + day;
+                        }
+                        return (
+                                time.getTime() >
+                                new Date(date.getFullYear() + "-" + month + "-" + day)
+                        );
+                    }
+                },
+
+                //查询表
+                searchForm: {
+                    page: {
+                        page: 1,
+                        pageSize: 10,
+                        total: 0
+                    },
+                    params: {
+                        bssArea:'',
+                        bssStatus:'',
+                        bssType:'',
+                        bssCode:'',
+                        bssName:'',
+                        bssAreaName:'',
+                    },
+                },
+                /****查看详情box****/
+                isShowDetail: false,
+                code:'',
+                projectName:'',
+            };
+        },
+        created: function () {
+            this.getBtns();
+            this.refreshData();
+
+            // 设置表格高度
+            this.tableHeight = setTableHeight()
+
+            let that = this
+            window.onresize = function () {
+                that.tableHeight = setTableHeight()
+                // 对表格重新布局
+                that.$refs['xzTable'].doLayout()
+            }
+        },
+
+        methods: {
+
+            handleExcel:function() {
+                this.title = "导出";
+                this.ifShowExport = true;
+                this.type='export';
+                return;
+            },
+            getGroupList: function (pageObj) {
+                this.searchForm.page.page = pageObj.page;
+                this.searchForm.page.pageSize = pageObj.limit;
+                this.refreshData();
+            },
+            handleCurrentChange(val){
+                this.$refs.xzTable.toggleRowSelection(val);
+            },
+            // 加载可以看到的按钮
+            getBtns: function () {
+                let parentId = window.sessionStorage.getItem("parentId");
+                let that = this;
+                that.btns05 = [];
+                that.btns6 = [];
+                get("/sys/permission/findButtonByParent/", {
+                    parentId: parentId
+                }).then(function (res) {
+                    that.btns = res.result;
+                    if (that.btns.length <= 6) {
+                        that.btns05 = that.btns;
+                    } else {
+                        for (let i = 0; i < that.btns.length; i++) {
+                            if (i < 5) {
+                                that.btns05.push(that.btns[i]);
+                            } else {
+                                that.btns6.push(that.btns[i]);
+                                console.log(that.btns6);
+                            }
+                        }
+                    }
+                });
+            },
+            //时间格式化
+            dateFormat: function (row, column) {
+                var date = "";
+                if (column.property == "finishTime") {
+                    date = row.finishTime;
+                } else if (column.property == "startTime") {
+                    var date = row.startTime;
+                }
+                if (typeof date == "") {
+                    return "";
+                }
+                return this.formatDate("yyyy-MM-dd", date);
+            },
+
+            formatDate: function (fmt, date) {
+                date = new Date(date);
+                var o = {
+                    "M+": date.getMonth() + 1, //月份
+                    "d+": date.getDate(), //日
+                    "h+": date.getHours(), //小时
+                    "m+": date.getMinutes(), //分
+                    "s+": date.getSeconds(), //秒
+                    "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+                    S: date.getMilliseconds() //毫秒
+                };
+                if (/(y+)/.test(fmt))
+                    fmt = fmt.replace(
+                            RegExp.$1,
+                            (date.getFullYear() + "").substr(4 - RegExp.$1.length)
+                    );
+                for (var k in o)
+                    if (new RegExp("(" + k + ")").test(fmt))
+                        fmt = fmt.replace(
+                                RegExp.$1,
+                                RegExp.$1.length == 1
+                                        ? o[k]
+                                        : ("00" + o[k]).substr(("" + o[k]).length)
+                        );
+                return fmt;
+            },
+            // 刷新数据
+            refreshData: function () {
+
+                this.tableData = [];
+                this.selectItem = [];
+                let that = this;
+//              console.log(that.zcssList);
+                // 刷新
+                POSTbyJSON("/${pathName}/list", this.queryParams).then(function (res) {
+                    if (res.success && res.result) {
+                        that.tableData = res.result.rows;
+                        that.queryParams.page.total = res.result.total;
+                        that.queryParams.page.page = res.result.currentPage;
+                    } else {
+                        that.tableData = [];
+                        that.queryParams.page.total = 0;
+                    }
+                });
+            },
+            handleSelect: function (selection, row) {
+                this.selectItem = selection;
+            },
+            handleSelectAll: function (selection) {
+                this.selectItem = selection;
+            },
+            // 处理查询功能
+            handleSearch: function () {
+                this.ifShowSearch = true;
+                //查询表
+                this.searchForm.params.bssArea = "";
+                this.searchForm.params.bssStatus = "";
+                this.searchForm.params.bssType = "";
+                this.searchForm.params.bssCode = "";
+                this.searchForm.params.bssName = "";
+                this.searchForm.params.bssAreaName = "";
+                this.searchForm.params.bssAreaName = "";
+                this.searchForm.params.projectId = "";
+                this.searchForm.page.page = 1
+                this.searchForm.page.pageSize = 10
+            },
+
+            // 确定查询
+            doSearch: function () {
+                this.queryParams.page.page = 1
+                this.queryParams.page.pageSize = 10
+                // this.queryParams.page.total = 0
+                this.tableData = [];
+                this.selectItem = [];
+                // debugger
+                let that = this;
+                //
+                POSTbyJSON("/${pathName}/list", that.queryParams).then(function (res) {
+                    if (res.success && res.result) {
+                        that.tableData = res.result.rows;
+                        that.queryParams.page.total = res.result.total;
+                    } else {
+                        that.tableData = [];
+                        that.queryParams.page.total = 0;
+                    }
+                });
+                this.ifShowSearch = false;
+                this.clearAble = true;
+            },
+
+
+            // 处理新增、编辑、查看
+            handleDialog: function (type) {
+                this.type = type;
+                this.addForm = {
+
+                };
+                if (type === 'add') {
+                    this.addForm = {
+
+                    };
+                    this.title = '新增';
+                    this.ifShowAdd = true;
+                    this.$nextTick(function () {
+                        this.$refs['addForm'].clearValidate()
+                    })
+                } else if (type === 'edit' || type === 'look') {
+                    if (type === 'edit') {
+                        // 编辑
+                        this.title = '编辑';
+                    }
+                    if (this.selectItem.length > 1) {
+                        this.$alertMessage('warning', '至多选择一条')
+                        return;
+                    } else if (this.selectItem.length < 1) {
+                        this.$alertMessage('warning', '至少选择一条')
+                        return;
+                    } else {
+                        let obj = this.selectItem[0];
+                        console.log(this.areaName)
+                        this.addForm = obj
+                        // 服务站详情变量赋值
+                        this.deviceId = obj.id;
+                        if (type === 'edit') {
+                            this.ifShowAdd = true;
+                            this.$nextTick(function () {
+                                this.$refs['addForm'].clearValidate()
+                            })
+                        }
+                    }
+                }
+            },
+            // 确定新增
+            handleClickSure: function () {
+                let that = this;
+                if (this.type === "add") {
+                    #[[this.$refs['addForm'].validate((valid) => {]]#
+                       if (valid){
+                            POSTbyJSON("/${pathName}/save", that.addForm).then(function (res) {
+                                if (res.success) {
+                                    that.$alertMessage('success', '新增成功');
+                                    that.ifShowAdd = false;
+                                    that.refreshData();
+                                }
+                            });
+                        }
+                    })
+                } else if (this.type === "edit") {
+                    //编辑请求
+                    POSTbyJSON("/${pathName}/update", that.addForm).then(function (res) {
+                        if (res.success) {
+                            that.$alertMessage('success', '编辑成功');
+                            that.ifShowAdd = false;
+                            that.refreshData();
+                        }
+                    });
+                }else if (this.type==='export'){
+                        let data = {
+                            startTime: that.addForm.startTime,
+                            endTime: that.addForm.finishTime
+                        };
+                        exportFn("/${pathName}/downExcel", data, true).then(function (res) {
+                            let dateTime = new Date();
+                            let nowTime = dateTime.toLocaleString();
+                            let dates = nowTime.substring(0, 10);
+                            let times = nowTime.substring(12, 20); //截取时间
+                            let blob = new Blob([res], {
+                                type: "application/vnd.ms-excel"
+                            });
+                            let downloadElement = document.createElement("a");
+                            let href = window.URL.createObjectURL(blob); //创建下载的链接
+                            downloadElement.href = href;
+                            downloadElement.download = "希特勒的失败设备名单" + dates + times + ".xlsx";
+                            document.body.appendChild(downloadElement);
+                            downloadElement.click(); //点击下载
+                            document.body.removeChild(downloadElement); //下载完成移除元素
+                            window.URL.revokeObjectURL(href); //释放掉blob对象
+                        });
+
+                }
+
+            },
+
+            // 处理删除
+            handleDelete: function () {
+                if (this.selectItem.length < 1) {
+                    this.$alertMessage('waring', '至少选择一条');
+                    return;
+                }
+                this.$confirm("确定删除选中设备吗", '提示', {
+                    closeOnClickModal: false
+                }).then(() => {
+                    let that = this;
+                    let ids = [];
+                    that.selectItem.forEach(item => {
+                        ids.push(item.id);
+                    })
+                    Delete("/${pathName}/delete", {
+                        ids: ids
+                    }).then(function (res) {
+                        if (res.success) {
+                            that.$alertMessage('success', '删除成功');
+                            that.queryParams = {
+                                page: {
+                                    page: 1,
+                                    pageSize: 10,
+                                    total: 0
+                                },
+                                params: {
+                                    address: "",
+                                    city: "",
+                                    code: "",
+                                    contact: "",
+                                    contactPhone: "",
+                                    dTypeName: "",
+                                    deleteState: "",
+                                    dimension: "",
+                                    areaName: "",
+                                },
+                            };
+                            that.refreshData();
+                        }
+                    })
+                }).catch(_ => {
+
+                })
+            },
+        },
+        //注册组件
+        components: {
+            Paginations,
+        },
+    };
+</script>
+<style src="../../../assets/css/xz_common.css"></style>
+<style>
+    .el-table td,
+    .el-table th {
+        text-align: center
+    }
+
+    .el-dialog {
+        margin: auto !important;
+        top: 60px !important;
+    }
+
+    .mr5 {
+        margin-right: 4px !important;
+        margin-left: -6px !important;
+    }
+
+    .detail-span {
+        color: #333;
+        font-weight: bold;
+    }
+    .pidList {
+        width: 100%;
+        min-height: 50px;
+        padding: 10px 5px;
+        background-color: #fff;
+        position: absolute;
+        top: 40px;
+        left: 0;
+        z-index: 10;
+        display: inline-block;
+        border: 1px solid #ccc;
+    }
+    .el-select-dropdown__wrap {
+        max-height: 265px;
+    }
+</style>

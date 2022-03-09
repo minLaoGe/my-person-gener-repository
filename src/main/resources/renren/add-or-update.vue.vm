@@ -1,0 +1,161 @@
+<template>
+  <el-dialog
+    :title="!dataForm.${pk.attrname} ? '新增' : '修改'"
+    :close-on-click-modal="false"
+    :visible.sync="visible">
+    <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
+
+
+
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName)
+<el-form-item label="${column.lable}" prop="${column.attrname}">
+    #if(${column.ifSelect} && ${column.ifNeedDic})
+        <el-select v-model="dataForm.${column.attrname}" clearable placeholder="请选择">
+            <el-option
+                    v-for="item in ${column.attrname}Option"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+            </el-option>
+        </el-select>
+    #elseif(${column.ifSelect})
+        <el-select v-model="dataForm.${column.attrname}" @change="change" clearable placeholder="请选择">
+            <el-option
+                    v-for="item in ${column.attrname}Option"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+            </el-option>
+        </el-select>
+    #else
+            <el-input v-model="dataForm.${column.attrname}" placeholder="${column.lable}"></el-input>
+    #end
+</el-form-item>
+#end
+#end
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="visible = false">取消</el-button>
+      <el-button type="primary" @click="dataFormSubmit()">确定</el-button>
+    </span>
+  </el-dialog>
+</template>
+
+<script>
+  export default {
+    data () {
+      return {
+        visible: false,
+
+        reqParam: {
+            page: {
+                page: 1,
+                limit: 10
+            },
+            params: {
+
+            }
+        },
+#foreach($column in $columns)
+    #if(${column.ifSelect})
+            ${column.attrname}Option:
+        #if(!${column.ifNeedDic})
+             ${column.selectData},
+        #else
+        {},
+        #end
+    #end
+#end
+        dataForm: {
+#foreach($column in $columns)
+#if($column.columnName == $pk.columnName)
+          ${column.attrname}: 0,
+#else
+          ${column.attrname}: ''#if($velocityCount != $columns.size()),#end
+
+#end
+#end
+        },
+        dataRule: {
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName)
+          ${column.attrname}: [
+            { required: true, message: '${column.comments}不能为空', trigger: 'blur' }
+          ]#if($velocityCount != $columns.size()),#end
+
+#end
+#end
+        }
+      }
+    },
+   mounted() {
+    this.selectDic();
+   },
+    methods: {
+        change(){
+            this.$forceUpdate();
+        },
+      init (id) {
+        this.dataForm.${pk.attrname} = id || 0
+        this.visible = true
+        this.$nextTick(() => {
+          this.$refs['dataForm'].resetFields()
+          if (this.dataForm.${pk.attrname}) {
+            this.$http({
+              url: #[[this.$http.adornUrl]]#(`/${controlerName}/info/#[[$]]#{this.dataForm.${pk.attrname}}`),
+              method: 'get',
+              #[[params: this.$http.adornParams()]]#
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                  this.dataForm=data.data.info;
+              }
+            })
+          }
+        })
+      },
+        selectDic(){
+          #if($dicKeys)
+         let keys=$dicKeys;
+          let that=this;
+            this.#[[$utils]]#.POST(`${dicUrl}`,keys).then(res =>{
+                #foreach($column in $columns)
+                    #if(${column.ifNeedDic})
+                        this.${column.attrname}Option=res.data.map.${column.dicKey}
+                    #end
+                #end
+            })
+           #end
+
+        },
+      // 表单提交
+      dataFormSubmit () {
+        #[[this.$refs['dataForm'].validate((valid) => {]]#
+          if (valid) {
+            this.$http({
+              url: #[[this.$http.adornUrl]]#(`/${controlerName}/${!this.dataForm.${pk.attrname} ? 'save' : 'update'}`),
+              method: 'post',
+              #[[data: this.$http.adornData(]]#
+                    this.dataForm
+              )
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                #[[this.$message({]]#
+                  message: '操作成功',
+                  type: 'success',
+                  duration: 1500,
+                  onClose: () => {
+                    this.visible = false
+                    #[[this.$emit('refreshDataList')]]#
+                  }
+                })
+              } else {
+                #[[this.$message.error(data.msg)]]#
+              }
+            })
+          }
+        })
+      }
+    }
+  }
+</script>

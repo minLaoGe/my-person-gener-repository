@@ -1,0 +1,15 @@
+# Live Template
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
+局部变量使用 final
+# File Type
+
+ALTER TABLE service_history ADD creator_name varchar(125) comment '创建人';
+ALTER TABLE service_history ADD update_user_name varchar(125) comment '更新人';
+
+
+ALTER TABLE service_history ADD create_time datetime comment '创建时间';
+ALTER TABLE service_history ADD creator_id bigint comment '创建者id';
+ALTER TABLE service_history ADD update_user_id bigint comment '更新者id';
+ALTER TABLE service_history ADD update_time datetime comment '更新时间';
+

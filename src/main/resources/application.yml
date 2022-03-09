@@ -1,0 +1,42 @@
+spring:
+  profiles:
+    active: oracle
+  # renren 是原生的-明月 , template 是 熙重 用于纪念上家公司
+  thymeleaf:
+    prefix: renren
+  redis:
+    host: 192.168.23.174
+    port: 6379
+    #客户端超时
+    timeout: 10000
+    #最大连接数
+    redis:
+      lettuce:
+        pool:
+          max-active: 20
+          #最小空闲
+          min-idle: 5
+          #连接超时
+          max-wait: 5000ms
+          #最大空闲
+          max-idle: 20
+templates:
+  allfile: AllCreateTable.sql.vm
+
+rap:
+  baseUrl: http://rap.jintoucloud.cn:38080
+  cookie: experimentation_subject_id=ImU0ZTcyM2QxLTc5OWYtNDJiYS1iMWExLWMzYmQ0MDJhOGM3NyI%3D--22248a74eb74343389e7c8e63f22b3ab4c7a1545; koa.sid=AS3ZgewTifLwj0FHX3-fzH0SOt-U2AxP; koa.sid.sig=L6Kudu6v4Bc50xUMi3KwiQ7hMT0
+  # 第一个id是需要查询接口者的id， 这两个id是所有模块的id
+  programmersId: 100000042,100000047
+  ## 接口文档的名字
+  interfaceName: 接口文档
+  # 接口文档模板名字不包括后缀
+  templateName: freemarkTemplate
+
+
+  # 生成表结构
+  prefix: disable_,social_
+  # 生成表结构文档的名字
+  tableName: 爱红表结构
+  # 表结构模板的名字
+  tableTemplateName: modleOfTable

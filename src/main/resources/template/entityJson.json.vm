@@ -1,0 +1,16 @@
+{
+    #foreach ($column in $columns)
+        #if($velocityCount!=$columns.size())
+                $column.attrname : "",
+        #else
+                $column.attrname : ""
+        #end
+    #end
+}
+#foreach ($column in $columns)
+    #if($velocityCount!=$columns.size())
+        $column.attrname : "", //${column.comments}
+    #else
+        $column.attrname : ""   //${column.comments}
+    #end
+#end

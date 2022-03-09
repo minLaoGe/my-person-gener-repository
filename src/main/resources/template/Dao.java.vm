@@ -1,0 +1,36 @@
+package ${package}.${moduleName}.dao;
+
+##import ${package}.entity.${className}Entity;
+import com.herocheer.module.data.mybatis.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Mapper;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+@Repository
+public interface ${className}Dao extends BaseMapper<${className}Entity,${pk.attrType}> {
+ /**
+  * 根据条件进行分页查找
+  * @param delWrapper
+  * @param page
+  * @return
+  */
+    List<${className}Entity> selectPageByComplexCondition(@Param(Constants.WRAPPER) QueryWrapper delWrapper,Page<${className}Entity> page);
+    /**
+  * 更新属性值不为空的字段
+  * @param delWrapper
+  * @param page
+  * @return
+  */
+    public void  updateAttrIsNotNullById(${className}Entity entity);
+
+}

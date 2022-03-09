@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="testa" class="io.renren.entity.test.TestA">
+            <constructor-arg index="0" ref="testb" />
+    </bean>
+    <bean id="testb" class="io.renren.entity.test.TestB">
+        <constructor-arg index="0" ref="testc" />
+    </bean>
+    <bean id="testc" class="io.renren.entity.test.TestC">
+        <constructor-arg index="0" ref="testa"/>
+    </bean>
+</beans>

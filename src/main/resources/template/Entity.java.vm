@@ -1,0 +1,60 @@
+package ${package}.${moduleName}.entity;
+
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.herocheer.module.data.mybatis.entity.BaseIdEntity;
+#if(${hasBigDecimal})
+import java.math.BigDecimal;
+#end
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.util.Date;
+#if(!$getAndSet)
+import lombok.Data;
+#end
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModelProperty;
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+#if(!$getAndSet)
+@Data
+#end
+@TableName("${tableName}")
+public class ${className}Entity extends BaseIdEntity {
+
+#foreach ($column in $columns)
+	/**
+	 * $column.comments
+	 */
+	#if($column.columnName == $pk.columnName)
+@TableId
+	#end
+@ApiModelProperty(value = "${column.comments}")
+	#if($column.dataType =="datetime" ||  $column.dataType =="timestamp")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	#end
+@TableField("${column.columnName}")
+private $column.attrType $column.attrname;
+
+#end
+
+#foreach ($column in $columns)
+	#if($getAndSet)
+		public $column.attrType get${column.attrName}() {
+			return ${column.attrname};
+		}
+
+		public void set${column.attrName}($column.attrType ${column.attrname}) {
+			this.${column.attrname} = ${column.attrname};
+		}
+	#end
+#end
+}

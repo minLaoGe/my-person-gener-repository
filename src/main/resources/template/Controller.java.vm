@@ -1,0 +1,121 @@
+package ${package}.controller;
+
+import java.util.Arrays;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.herocheer.ems.common.response.ListResponse;
+import javax.validation.constraints.NotEmpty;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+//import ${package}.entity.${className}Entity;
+//import ${package}.service.${className}Service;
+
+
+
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+@RestController
+@RequestMapping("/${pathName}")
+public class ${className}Controller {
+    @Autowired
+    private ${className}Service ${classname}Service;
+
+    /**
+     * 单张表的列表用次接口足够了
+     */
+    @PostMapping("/list")
+  //  @RequiresPermissions("${moduleName}:${pathName}:list")
+    public JsonResponse<ListResponse<${className}Entity>> list(HttpServletRequest request, ListParams<${className}Entity> params){
+        SearchCondition<${className}Entity> searchCondition = SearchUtils.getSearchCondition(request, params, ${className}Entity.class);
+        return ResponseUtils.setDataAndResponse(${classname}Service.page( searchCondition.getPage(),searchCondition.getWrapper()));
+    }
+    /**
+     * 多张表的复杂查询，需要写sql的，用次接口
+     */
+    @PostMapping("/listByCondition")
+ //   @RequiresPermissions("${moduleName}:${pathName}:list")
+    public JsonResponse<ListResponse<${className}Entity>> listComplexCondition(HttpServletRequest request, ListParams<${className}Entity> params){
+        SearchCondition<${className}Entity> searchCondition = SearchUtils.getSearchCondition(request, params, ${className}Entity.class);
+        Page<${className}Entity> pageList=${classname}Service.selectPageByComplexCondition( searchCondition.getWrapper(),searchCondition.getPage());
+        return ResponseUtils.setDataAndResponse(pageList);
+    }
+
+
+    /**
+     * 信息
+     */
+    @GetMapping("/info/{${pk.attrname}}")
+  //  @RequiresPermissions("${moduleName}:${pathName}:info")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "${pk.attrname}", value = "主键")
+    })
+    public JsonResponse<${className}Entity> info(@PathVariable("${pk.attrname}") @NotEmpty(message = "请输入信息") ${pk.attrType} ${pk.attrname}){
+		${className}Entity ${classname} = ${classname}Service.getById(${pk.attrname});
+
+        return ResponseUtils.setSuccess(${classname});
+    }
+
+    /**
+     * 保存
+     */
+    @PostMapping("/save")
+//    @RequiresPermissions("${moduleName}:${pathName}:save")
+    @ApiImplicitParam(name = "${classname}", value = "${comments}", required = true, dataTypeClass = ${className}Entity.class)
+    public JsonResponse save(@RequestBody ${className}Entity ${classname}){
+		${classname}Service.save(${classname});
+        return ResponseUtils.setSuccess();
+    }
+
+    /**
+     * 修改
+     */
+    @PostMapping("/update")
+ //   @RequiresPermissions("${moduleName}:${pathName}:update")
+    @ApiImplicitParam(name = "${classname}", value = "${comments}", required = true, dataTypeClass = ${className}Entity.class)
+    public JsonResponse update(@RequestBody ${className}Entity ${classname}){
+		${classname}Service.updateById(${classname});
+        return ResponseUtils.setSuccess();
+    }
+
+    /**
+     * 删除
+     */
+    @GetMapping("/delete")
+  //  @RequiresPermissions("${moduleName}:${pathName}:delete")
+    public JsonResponse delete(@RequestBody ${pk.attrType}[] ${pk.attrname}s){
+		${classname}Service.removeByIds(Arrays.asList(${pk.attrname}s));
+
+        return ResponseUtils.setSuccess();
+    }
+    /**
+     * 导出
+     */
+    @GetMapping("/downExcel")
+    @ApiOperation("导出Excel文档")
+ //   @RequiresPermissions("${moduleName}:${pathName}:downExcel")
+    public void downExcel(@RequestBody PaperAlarmQueryParam entity, HttpServletResponse response) {
+        QueryWrapper build = entity.build2();
+        List list = ${classname}Service.list(build);
+        String title = "耗材告警导出";
+        Map<String, String> headerMap = new LinkedHashMap<>();
+        #foreach($column in $columns)
+            #if($column.columnName != $pk.columnName)
+                    headerMap.put("${column.attrname}", "${column.comments}");
+            #end
+        #end
+        Workbook wb = ExportExcelUtil.exportExcels(title, headerMap, list);
+        ExcelUtil.downloadExcel(title, wb, response);
+    }
+
+}

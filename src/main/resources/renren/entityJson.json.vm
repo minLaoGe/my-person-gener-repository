@@ -1,0 +1,69 @@
+//普通格式
+{
+  "msg": "success",
+  "code": 0,
+  "info":
+    {
+    #foreach ($column in $columns)
+        #if($velocityCount!=$columns.size())
+
+                $column.attrname : "${column.comments} 类型是#if($column.dataType=="String"|| $column.dataType=="Date")string;#elseif ($column.attrType=="Integer"||$column.attrType=="Float"||$column.attrType=="Double"||$column.attrType=="BigDecimal"||$column.attrType=="Long"
+            ||$column.attrType=="Byte"
+            )number;#elseif($column.attrType=="Boolean") boolean;#else string;#end",#else $column.attrname : "${column.comments} 类型是#if($column.dataType=="String"|| $column.dataType=="Date")string;#elseif ($column.attrType=="Integer"||$column.attrType=="Float"||$column.attrType=="Double"||$column.attrType=="BigDecimal"||$column.attrType=="Long"
+            ||$column.attrType=="Byte"
+            )number;#elseif($column.attrType=="Boolean") boolean;#else string;#end"#end
+
+    #end
+}
+}
+,
+{
+"msg": "success",
+"code": 0,
+}
+,
+//分页接受格式   EQ_是精确匹配，LIKE_是模糊匹配
+{
+"page": {
+"page": 1,
+"limit": 1,
+},
+"params": {
+#foreach ($column in $columns)
+
+    #if($velocityCount!=$columns.size())
+
+    EQ_$column.attrname : "${column.comments} 类型是#if($column.dataType=="String"|| $column.dataType=="Date")string;#elseif ($column.attrType=="Integer"||$column.attrType=="Float"||$column.attrType=="Double"||$column.attrType=="BigDecimal"||$column.attrType=="Long"
+    ||$column.attrType=="Byte")number;#elseif($column.attrType=="Boolean") boolean;#else string;#end",#else EQ_$column.attrname :"${column.comments} 类型是#if($column.dataType=="String"|| $column.dataType=="Date")string;#elseif ($column.attrType=="Integer"||$column.attrType=="Float"||$column.attrType=="Double"||$column.attrType=="BigDecimal"||$column.attrType=="Long"
+    ||$column.attrType=="Byte")number;#elseif($column.attrType=="Boolean") boolean;#else string;#end"#end
+
+#end
+}
+}
+,
+//分页响应格式
+{
+"msg": "success",
+"code": 0,
+"page": {
+"totalCount": 2,
+"pageSize": 1,
+"totalPage": 2,
+"currPage": 1,
+"list": [
+{
+    #foreach ($column in $columns)
+        #if($velocityCount!=$columns.size())
+
+            $column.attrname : "${column.comments} 类型是#if($column.dataType=="string"|| $column.dataType=="date")string;#elseif ($column.attrType=="Integer"||$column.attrType=="Float"||$column.attrType=="Double"||$column.attrType=="BigDecimal"||$column.attrType=="Long"
+        ||$column.attrType=="Byte"
+        )number;#elseif($column.attrType=="Boolean") boolean;#else string;#end",#else$column.attrname : "${column.comments} 类型是#if($column.dataType=="string"|| $column.dataType=="date")string;#elseif ($column.attrType=="Integer"||$column.attrType=="Float"||$column.attrType=="Double"||$column.attrType=="BigDecimal"||$column.attrType=="Long"
+        ||$column.attrType=="Byte"
+        )number;#elseif($column.attrType=="Boolean")boolean;#else string;#end"#end
+
+    #end
+}
+]
+}
+}
+,

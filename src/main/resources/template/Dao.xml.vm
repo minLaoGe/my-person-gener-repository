@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${package}.dao.${className}Dao">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="${package}.entity.${className}Entity" id="${classname}Map">
+        #foreach($column in $columns)
+            <result property="${column.attrname}"  column="${column.columnName}"/>
+        #end
+    </resultMap>
+    <sql  id="${classname}_sql">
+        #foreach($column in $columns)
+            ${column.columnName},
+        #end
+    </sql>
+
+    <select id="selectPageByComplexCondition" resultType="${package}.entity.${className}Entity">
+        SELECT
+        <include refid="${classname}_sql"></include>
+        FROM  ${className}
+        <where>
+            ${ew.sqlSement}
+        </where>
+    </select>
+
+
+    <update id="updateAttrIsNotNullById" parameterType="${package}.entity.${className}Entity">
+        update bu_printer_alarm
+        <set>
+            #foreach($column in $columns)
+                <if test="${column.attrname} != null">
+                    ${column.columnName} = #{${column.attrname}},
+                </if>
+            #end
+        </set>
+        where ${pk.columnName} = #{${pk.attrname}}
+    </update>
+</mapper>

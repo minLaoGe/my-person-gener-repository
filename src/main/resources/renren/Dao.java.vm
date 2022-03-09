@@ -1,0 +1,19 @@
+package ${package}.${moduleName}.dao;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import ${package}.${moduleName}.entity.${className}Entity;
+import java.util.Map;
+
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+@Mapper
+public interface ${className}Dao extends BaseMapper<${className}Entity> {
+    IPage<${className}Entity> selectPageByCondition(IPage< ${className}Entity > page, @Param("ew") QueryWrapper wrapper, @Param("map")Map<String,Object> map);
+}
