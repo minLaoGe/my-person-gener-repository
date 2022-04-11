@@ -18,4 +18,13 @@ public class TestController {
         System.out.println(testIsBug);
         return "success";
     }
+
+    public static void main(String[] args) {
+        Boolean aBoolean=null;
+        if (aBoolean){
+            System.out.println(2342);
+        }else {
+            System.out.println(4334);
+        }
+    }
 }

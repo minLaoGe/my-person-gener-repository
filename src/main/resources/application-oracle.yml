@@ -8,15 +8,11 @@ spring:
     #MySQL配置
 #    driverClassName: oracle.jdbc.driver.OracleDriver
 #    name: dev
-##    url: jdbc:mysql://www.minfengyu.cn:19650/explant?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&zeroDateTimeBehavior=CONVERT_TO_NULL
-#    url: jdbc:oracle:thin:@43.243.130.146:1521:oracle
-#    username: xz_fjzw
-#    password: xz_fjzw
    # oracle配置
     driverClassName: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@192.168.22.235:1521:auditdb
-    username: topzf
-    password: topzf
+    username: upsuser1
+    password: upsuser1
     #SQLServer配置
     #    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
     #    url: jdbc:sqlserver://192.168.10.10:1433;DatabaseName=renren_fast

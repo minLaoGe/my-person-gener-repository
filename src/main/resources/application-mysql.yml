@@ -8,11 +8,7 @@ spring:
     #MySQL配置
     driverClassName: com.mysql.cj.jdbc.Driver
     name: dev
-#    url: jdbc:mysql://www.minfengyu.cn:19650/explant?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&zeroDateTimeBehavior=CONVERT_TO_NULL
-#    url: jdbc:mysql://www.minfengyu.cn:19650/ems?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&zeroDateTimeBehavior=CONVERT_TO_NULL
     url: jdbc:mysql://127.0.0.1:3306/user_center?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&zeroDateTimeBehavior=CONVERT_TO_NULL&allowPublicKeyRetrieval=true
-#    url: jdbc:mysql://www.minfengyu.cn:19650/dz_wlzx_dev?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&zeroDateTimeBehavior=CONVERT_TO_NULL
-#        url: jdbc:mysql://218.98.100.11:19307/ems?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&zeroDateTimeBehavior=CONVERT_TO_NULL
     username: root
     #    password: root
 #    password: Z~god@bless9~me
